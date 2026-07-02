@@ -34,17 +34,17 @@ pip install -r requirements.txt
 
 4. Создайте и запустите docker-контейнеры:
 ```bash
-# Postgres
-docker run -d --name search-postgres -e POSTGRES_USER=search_user -e POSTGRES_PASSWORD=search_pass -e POSTGRES_DB=search_db -p 5432:5432 -v search_pgdata:/var/lib/postgresql/data postgres:16
+# Postgres (укажите свой пароль вместо your_password)
+docker run -d --name search-postgres -e POSTGRES_USER=search_user -e POSTGRES_PASSWORD=your_password -e POSTGRES_DB=search_db -p 5432:5432 -v search_pgdata:/var/lib/postgresql/data postgres:16
 
 # Elasticsearch
 docker run -d --name search-elasticsearch -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -p 9200:9200 elasticsearch:9.4.1
 ```
 
-5. Заполните .env-файл данными, которые использовались при создании docker-контейнеров:
+5. Заполните .env-файл данными (скопируйте `.env.example`-файл), которые использовались при создании docker-контейнеров:
 ```
 DB_USER=search_user
-DB_PASSWORD=search_pass
+DB_PASSWORD=... # ваш пароль
 DB_NAME=search_db
 DB_HOST=localhost
 DB_PORT=5432
@@ -63,13 +63,20 @@ python load_data.py
 ```
 
 ### Запуск проекта
-Для запуска сервиса используйте команду:
+Для запуска используйте команду:
 ```bash
 python main.py
 ```
+Сервис поднимется на адресе `http://localhost:8000`
 
 ## Структура проекта
 - `main.py`
+- `config.py`
+- `database.py`
+- `docs.json`
+- `models.py`
+- `schemas.py`
+
 
 ## Лицензия
 Этот проект распространяется под лицензией MIT.
