@@ -1,17 +1,21 @@
+from pathlib import Path
+
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from models import Base, Document
 
-from scripts.csv_parser import parse_data
+from csv_parser import parse_data
 from config import db_engine
 
+# путь к csv-файлу относительно корня проекта, независимо от рабочего каталога
+CSV_PATH = Path(__file__).resolve().parent.parent / "data" / "posts.csv"
 
 def fill_database():
     # создание таблиц в базе данных
     Base.metadata.create_all(bind=db_engine)
 
     # загрузка данных из csv-файла в правильном формате
-    data = parse_data(path='posts.csv')
+    data = parse_data(path=str(CSV_PATH))
 
     # создание сессии и загрузка данных в БД
     try:
