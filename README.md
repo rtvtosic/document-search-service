@@ -1,5 +1,5 @@
 # Сервис по поиску документов
-Сервис полнотекстового поиска по документам, документы хранятся в PostgreSQL, поисковый индекс - в Elasticsearch
+Сервис полнотекстового поиска по документам, документы хранятся в PostgreSQL, поисковый индекс — в Elasticsearch
 
 # Стек технологий
 Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Docker
@@ -7,7 +7,6 @@ Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Docker
 # Требования
 * Python 3.12
 * Docker
-* Elasticsearch
 
 ## Установка
 1. Клонируйте репозиторий:
@@ -15,7 +14,7 @@ Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Docker
 git clone https://github.com/rtvtosic/test_task.git
 cd test_task
 ```
-2. Создайте и активируйте вирутальное окружение
+2. Создайте и активируйте виртуальное окружение
 ```bash
 python -m venv venv # создание окружения
 ```
@@ -39,6 +38,17 @@ docker run -d --name search-postgres -e POSTGRES_USER=search_user -e POSTGRES_PA
 
 # Elasticsearch
 docker run -d --name search-elasticsearch -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -p 9200:9200 elasticsearch:9.4.1
+
+# проверьте, что контейнеры поднялись (в списке должны быть search-postgres и search-elasticsearch со статусом Up)
+docker ps
+```
+Остановка контейнеров:
+```bash
+docker stop search-postgres search-elasticsearch
+```
+Повторный запуск контейнеров:
+```bash
+docker start search-postgres search-elasticsearch
 ```
 
 5. Заполните .env-файл данными (скопируйте `.env.example`-файл), которые использовались при создании docker-контейнеров:
@@ -53,30 +63,37 @@ ELASTIC_HOST=localhost
 ELASTIC_PORT=9200
 ```
 
-
 ## Использование
-
-### Подготовка данных (Создание БД, индекса и заполнение их данными)
+### Подготовка данных (Создание базы данных, индекса и заполнение их данными)
 ```bash
 cd scripts/
 python load_data.py
 ```
 
 ### Запуск проекта
-Для запуска используйте команду:
+После подготовки данных используйте команду для запуска:
 ```bash
 python main.py
 ```
 Сервис поднимется на адресе `http://localhost:8000`
 
-## Структура проекта
-- `main.py`
-- `config.py`
-- `database.py`
-- `docs.json`
-- `models.py`
-- `schemas.py`
+## Описание эндпоинтов
+* `POST /search` — тело `{"query": "текст"}`, возвращает список документов (id, text, created_date, rubrics), первые 20, по убыванию created_date.
+* `DELETE /documents/{doc_id}` — удаление из БД и индекса.
 
+Интерактивная документация с возможностью тестирования эндпоинтов находится на адресе `http://localhost:8000/docs`
+
+## Структура проекта
+- `main.py` - Главный файл проекта
+- `config.py` - Подключение к движку Postgres и клиенту Elasticsearch.
+- `database.py` - Создание сессии для работы с SQLAlchemy.
+- `docs.json` - Документация API в формате OpenAPI.
+- `models.py` - Модели данных для БД.
+- `schemas.py` - Pydantic-схемы для эндпоинтов.
+- `scripts/` - Скрипты для подготовки данных и загрузки их в БД и индекс.
+- `data/posts.csv` - Исходные данные для БД.
+- `requirements.txt` - Список зависимостей.
+- `.env.example` - Шаблон файла окружения.
 
 ## Лицензия
 Этот проект распространяется под лицензией MIT.
