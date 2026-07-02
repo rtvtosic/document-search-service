@@ -1,5 +1,5 @@
 # Сервис по поиску документов
-Сервис полнотекстового поиска по документам, документы хранятся в PostgreSQL, поисковый индекс — в Elasticsearch
+Я реализовал сервис полнотекстового поиска по постам соцсетей. Посты хранятся в PostgreSQL, поисковый индекс — в Elasticsearch.
 
 # Стек технологий
 Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Docker
