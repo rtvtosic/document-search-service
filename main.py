@@ -15,33 +15,11 @@ from schemas import SearchRequest, DocumentSchema
 
 app = FastAPI()
 
-@app.get("/documents/", response_model=list[DocumentSchema])
-def get_all_documents(db: Session = Depends(get_db)):
-    """Вывод всех документов"""
-
-    documents_list = []
-
-    documents = db.query(Document).all()
-    for doc in documents:
-        documents_list.append(doc)
-
-    return documents_list
-    
-
-# получение документа по id
-@app.get("/documents/{doc_id}", response_model=DocumentSchema)
-def get_document_by_id(doc_id: int, db: Session = Depends(get_db)):
-    """Получение документа по id"""
-    
-    doc = db.get(Document, doc_id)
-    if doc is None:
-        raise HTTPException(status_code=404, detail="Document Not Found")
-    
-    return doc
-
-
 # поиск документа по тексту
-@app.post("/search", response_model=list[DocumentSchema])
+@app.post("/search", 
+          response_model=list[DocumentSchema],
+          tags=["Методы"],
+          summary="Поиск документа по тексту")
 def search_docs_by_text(request: SearchRequest, 
                         db: Session = Depends(get_db)):
     """Поиск документа по тексту"""
@@ -74,7 +52,9 @@ def search_docs_by_text(request: SearchRequest,
     return result_documents
 
 # удалять документ из БД и индекса по полю id.
-@app.delete("/documents/{doc_id}")
+@app.delete("/documents/{doc_id}",
+            tags=["Методы"],
+            summary="Удаление документа из БД и индекса по id")
 def delete_doc_by_id(doc_id: int, db: Session = Depends(get_db)):
     """Удаление документа из БД и индекса по полю id"""
 
