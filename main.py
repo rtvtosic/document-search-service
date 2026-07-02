@@ -13,7 +13,9 @@ from config import client
 from schemas import SearchRequest, DocumentSchema
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Сервис поиска документов"
+)
 
 # поиск документа по тексту
 @app.post("/search", 
