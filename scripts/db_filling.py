@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from models import Base, Document
 
-from csv_parser import parse_data
+from scripts.csv_parser import parse_data
 from config import db_engine
 
 
