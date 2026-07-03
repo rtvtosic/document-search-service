@@ -119,7 +119,7 @@ cd ..
 ```bash
 python main.py
 ```
-Сервис поднимется на адресе `http://localhost:8000`, документация — `http://localhost:8000/docs`.
+Сервис поднимется на адресе `http://localhost:8000`, **интерактивная документация** — `http://localhost:8000/docs`.
 
 
 ## Запуск тестов
