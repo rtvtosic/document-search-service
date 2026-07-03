@@ -146,6 +146,69 @@ docker compose exec app pytest -v
 - корректный ответ `404` при удалении несуществующего документа.
 
 
+## API
+
+Базовый адрес — `http://localhost:8000`. Интерактивная документация (Swagger UI)
+доступна на `http://localhost:8000/docs`.
+
+| Метод    | Путь                   | Описание                                  |
+|----------|------------------------|-------------------------------------------|
+| `POST`   | `/search`              | Полнотекстовый поиск документов по тексту |
+| `DELETE` | `/documents/{doc_id}`  | Удаление документа из БД и индекса по `id` |
+
+### POST `/search`
+Ищет документы в Elasticsearch по полю `text`, затем подтягивает полные данные
+из PostgreSQL. Результаты отсортированы по дате создания (сначала новые),
+максимум — 20 документов.
+
+**Тело запроса:**
+```json
+{
+  "query": "информация"
+}
+```
+
+**Пример запроса:**
+```bash
+curl -X POST http://localhost:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "информация"}'
+```
+
+**Ответ `200 OK`** — список документов:
+```json
+[
+  {
+    "id": 42,
+    "text": "Текст документа...",
+    "created_date": "2024-05-17T12:30:00",
+    "rubrics": ["ECONOMY", "POLITICS"]
+  }
+]
+```
+
+### DELETE `/documents/{doc_id}`
+Удаляет документ по `id` сразу из PostgreSQL и из индекса Elasticsearch.
+
+**Пример запроса:**
+```bash
+curl -X DELETE http://localhost:8000/documents/42
+```
+
+**Ответ `200 OK`:**
+```json
+{
+  "detail": "Document deleted"
+}
+```
+
+**Ответ `404 Not Found`** — документа с таким `id` нет:
+```json
+{
+  "detail": "Document Not Found"
+}
+```
+
 ## Структура проекта
 - `main.py` - Главный файл проекта
 - `config.py` - Подключение к движку Postgres и клиенту Elasticsearch.
