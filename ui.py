@@ -1,9 +1,11 @@
+import os
 import requests
-from datetime import datetime
 import streamlit as st
 
+from datetime import datetime
 
-API_URL = "http://localhost:8000"
+
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.title("Поиск по документам")
 
