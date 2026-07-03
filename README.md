@@ -1,20 +1,76 @@
 # Сервис по поиску документов
-Я реализовал сервис полнотекстового поиска по постам соцсетей. Посты хранятся в PostgreSQL, поисковый индекс — в Elasticsearch.
+Сервис полнотекстового поиска по документам, документы хранятся в PostgreSQL, поисковый индекс - в Elasticsearch
 
 # Стек технологий
 Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Docker
 
 # Требования
-* Python 3.12
-* Docker
+* Python 3.12 (для локального запуска)
+* Docker (для обоих вариантов)
+* Docker Compose (для запуска через Docker Compose)
 
-## Установка
-1. Клонируйте репозиторий:
+## Подготовка репозитория
+Клонируйте репозиторий:
 ```bash
 git clone https://github.com/rtvtosic/test_task.git
 cd test_task
 ```
-2. Создайте и активируйте виртуальное окружение
+
+Создайте `.env`-файл (скопируйте `.env.example`) и заполните пароль:
+```
+DB_USER=search_user
+DB_PASSWORD=your_password   # укажите свой пароль
+DB_NAME=search_db
+DB_HOST=localhost
+DB_PORT=5432
+
+ELASTIC_HOST=localhost
+ELASTIC_PORT=9200
+```
+
+Ниже описаны два варианта запуска: [через Docker Compose](#вариант-1-запуск-через-docker-compose-рекомендуется) (рекомендуется) и [локально](#вариант-2-локальный-запуск).
+
+---
+
+## Вариант 1. Запуск через Docker Compose (рекомендуется)
+Поднимает сразу три сервиса: приложение (`app`), PostgreSQL и Elasticsearch.
+
+> В этом варианте значения `DB_HOST` и `ELASTIC_HOST` из `.env` автоматически
+> переопределяются на имена сервисов (`postgres` и `elasticsearch`) — менять их вручную не нужно.
+
+1. Соберите и запустите все сервисы:
+```bash
+docker compose up -d --build
+```
+Приложение дождётся готовности БД и Elasticsearch (настроены healthcheck).
+
+2. Проверьте, что контейнеры поднялись:
+```bash
+docker compose ps
+```
+
+3. Загрузите данные (создание таблиц, индекса и наполнение) — **внутри контейнера app**:
+```bash
+docker compose exec app python scripts/load_data.py
+```
+
+4. Сервис доступен на `http://localhost:8000`, документация — `http://localhost:8000/docs`.
+
+### Управление контейнерами
+```bash
+docker compose logs -f app      # логи приложения
+docker compose stop             # остановить
+docker compose up -d            # запустить снова
+docker compose down             # остановить и удалить контейнеры
+docker compose down -v          # то же + удалить данные (том search_pgdata)
+```
+
+---
+
+## Вариант 2. Локальный запуск
+Приложение запускается на хосте, а PostgreSQL и Elasticsearch — в отдельных docker-контейнерах.
+
+1. Создайте и активируйте виртуальное окружение:
 ```bash
 python -m venv venv # создание окружения
 ```
@@ -22,18 +78,19 @@ python -m venv venv # создание окружения
 ```bash
 source venv/bin/activate
 ```
-Активация на Windows:
-```bash
-venv/Scripts/Activate.ps1
+Активация на Windows (PowerShell):
+```powershell
+.\venv\Scripts\Activate.ps1
 ```
-3. Установите необходимые библиотеки:
+
+2. Установите необходимые библиотеки:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Создайте и запустите docker-контейнеры:
+3. Создайте и запустите docker-контейнеры с БД и индексом:
 ```bash
-# Postgres (укажите свой пароль вместо your_password)
+# Postgres (пароль должен совпадать с DB_PASSWORD из .env)
 docker run -d --name search-postgres -e POSTGRES_USER=search_user -e POSTGRES_PASSWORD=your_password -e POSTGRES_DB=search_db -p 5432:5432 -v search_pgdata:/var/lib/postgresql/data postgres:16
 
 # Elasticsearch
@@ -51,37 +108,22 @@ docker stop search-postgres search-elasticsearch
 docker start search-postgres search-elasticsearch
 ```
 
-5. Заполните .env-файл данными (скопируйте `.env.example`-файл), которые использовались при создании docker-контейнеров:
-```
-DB_USER=search_user
-DB_PASSWORD=... # ваш пароль
-DB_NAME=search_db
-DB_HOST=localhost
-DB_PORT=5432
+4. Убедитесь, что в `.env` указаны `DB_HOST=localhost` и `ELASTIC_HOST=localhost`.
 
-ELASTIC_HOST=localhost
-ELASTIC_PORT=9200
-```
-
-## Использование
-### Подготовка данных (Создание базы данных, индекса и заполнение их данными)
+5. Загрузите данные (создание базы данных, индекса и заполнение их данными):
 ```bash
 cd scripts/
 python load_data.py
+cd ..
 ```
 
-### Запуск проекта
-После подготовки данных используйте команду для запуска:
+6. Запустите проект:
 ```bash
 python main.py
 ```
-Сервис поднимется на адресе `http://localhost:8000`
+Сервис поднимется на адресе `http://localhost:8000`, документация — `http://localhost:8000/docs`.
 
-## Описание эндпоинтов
-* `POST /search` — тело `{"query": "текст"}`, возвращает список документов (id, text, created_date, rubrics), первые 20, по убыванию created_date.
-* `DELETE /documents/{doc_id}` — удаление из БД и индекса.
-
-Интерактивная документация с возможностью тестирования эндпоинтов находится на адресе `http://localhost:8000/docs`
+---
 
 ## Структура проекта
 - `main.py` - Главный файл проекта
@@ -94,8 +136,8 @@ python main.py
 - `data/posts.csv` - Исходные данные для БД.
 - `requirements.txt` - Список зависимостей.
 - `.env.example` - Шаблон файла окружения.
-- `Dockerfile` - образ приложения.
-- `docker-compose.yml` - оркестрация сервиса, PostgreSQL и Elasticsearch.
+- `Dockerfile` - Образ приложения.
+- `docker-compose.yml` - Оркестрация app + PostgreSQL + Elasticsearch.
 
 ## Лицензия
 Этот проект распространяется под лицензией MIT.
