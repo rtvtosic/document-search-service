@@ -94,6 +94,8 @@ python main.py
 - `data/posts.csv` - Исходные данные для БД.
 - `requirements.txt` - Список зависимостей.
 - `.env.example` - Шаблон файла окружения.
+- `Dockerfile` - образ приложения.
+- `docker-compose.yml` - оркестрация сервиса, PostgreSQL и Elasticsearch.
 
 ## Лицензия
 Этот проект распространяется под лицензией MIT.
