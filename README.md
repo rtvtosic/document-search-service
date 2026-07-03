@@ -182,7 +182,7 @@ curl -X POST http://localhost:8000/search \
     "id": 42,
     "text": "Текст документа...",
     "created_date": "2024-05-17T12:30:00",
-    "rubrics": ["ECONOMY", "POLITICS"]
+    "rubrics": ["VK-1603736028819866", "VK-22061572310", "VK-49691982478"]
   }
 ]
 ```
