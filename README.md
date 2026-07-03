@@ -1,8 +1,8 @@
 # Сервис по поиску документов
-Я реализовал сервис полнотекстового поиска по документам, которые хранятся в PostgreSQL, а поисковый индекс - в Elasticsearch. Сервис обернут в Docker, а также весь функционал покрыт тестами.
+Я реализовал сервис полнотекстового поиска по документам, которые хранятся в PostgreSQL, а поисковый индекс - в Elasticsearch. Сервис обернут в Docker, а также весь функционал покрыт тестами. Интерфейс сделан при помощи Streamlit.
 
 ## Стек технологий
-Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Docker
+Python 3.12, SQLAlchemy, FastAPI, PostgreSQL, Elasticsearch, Streamlit, Docker
 
 ## Требования
 * Python 3.12 (для локального запуска)
@@ -32,7 +32,7 @@ ELASTIC_PORT=9200
 
 
 ## Вариант 1. Запуск через Docker Compose (рекомендуется)
-Поднимает сразу три сервиса: приложение (`app`), PostgreSQL и Elasticsearch.
+Поднимает 4 сервиса: приложение (`app`), интерфейс (`ui`) PostgreSQL и Elasticsearch.
 
 > В этом варианте значения `DB_HOST` и `ELASTIC_HOST` из `.env` автоматически
 > переопределяются на имена сервисов (`postgres` и `elasticsearch`) — менять их вручную не нужно.
@@ -209,8 +209,38 @@ curl -X DELETE http://localhost:8000/documents/42
 }
 ```
 
+# Веб-интерфейс
+
+Помимо API, доступен простой веб-интерфейс на Streamlit (`ui.py`): поле поиска,
+выдача документов с рубриками и датой, а также кнопка удаления документа.
+Интерфейс обращается к API по адресу из переменной окружения `API_URL`
+(по умолчанию `http://localhost:8000`).
+
+### Через Docker Compose
+Сервис `ui` поднимается автоматически вместе с остальными:
+```bash
+docker compose up -d --build
+```
+Интерфейс будет доступен на `http://localhost:8501`
+(внутри Compose он ходит в API по адресу `http://app:8000`).
+
+### Локально
+При активированном виртуальном окружении и запущенном API (см. «Вариант 2»):
+```bash
+streamlit run ui.py
+```
+По умолчанию интерфейс откроется на `http://localhost:8501`.
+Если API запущен на другом адресе, задайте его через переменную окружения:
+```bash
+# Linux/macOS
+export API_URL=http://localhost:8000
+# Windows (PowerShell)
+$env:API_URL = "http://localhost:8000"
+```
+
 ## Структура проекта
-- `main.py` - Главный файл проекта
+- `main.py` - Главный файл проекта.
+- `ui.py` - Веб-интерфейс на Streamlit.
 - `config.py` - Подключение к движку Postgres и клиенту Elasticsearch.
 - `database.py` - Создание сессии для работы с SQLAlchemy.
 - `docs.json` - Документация API в формате OpenAPI.

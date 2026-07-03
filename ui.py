@@ -26,21 +26,33 @@ if st.button("Поиск"):
 
 if "results" in st.session_state:
     for doc in st.session_state["results"]:
-        # header, text, caption
-        st.header(f"#{doc['id']}", divider="violet")       
+        st.header(f"#{doc['id']}", divider="violet")
         st.write(doc["text"])
         date_obj = datetime.fromisoformat(doc['created_date'])
         st.caption(f"{date_obj.hour}:{date_obj.minute} {date_obj.day}.{date_obj.month}.{date_obj.year}")
-        st.caption(f"Рубрики: {', '.join(doc["rubrics"])}")
+        st.caption(f"Рубрики: {', '.join(doc['rubrics'])}")
 
-        if st.button("Удалить", key=f"del_{doc['id']}"):
-            del_response = requests.delete(f"{API_URL}/documents/{doc['id']}")
-
-            if del_response.status_code == 200:
-                st.session_state["results"] = [
-                    d for d in st.session_state["results"] if d["id"] != doc["id"]
-                ]
-                
+        # если подтверждение запрошено ИМЕННО для этого документа — показываем вопрос
+        if st.session_state.get("confirm_delete") == doc["id"]:
+            st.warning("Удалить этот документ?")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Да, удалить", key=f"yes_{doc['id']}"):
+                    del_response = requests.delete(f"{API_URL}/documents/{doc['id']}")
+                    if del_response.status_code == 200:
+                        st.session_state["results"] = [
+                            d for d in st.session_state["results"] if d["id"] != doc["id"]
+                        ]
+                        st.session_state["confirm_delete"] = None   # сбросить подтверждение
+                        st.rerun()
+                    else:
+                        st.error("Не удалось удалить")
+            with col2:
+                if st.button("Отмена", key=f"no_{doc['id']}"):
+                    st.session_state["confirm_delete"] = None       # сбросить, ничего не делая
+                    st.rerun()
+        else:
+            # обычная кнопка удаления — по клику запрашивает подтверждение
+            if st.button("Удалить", key=f"del_{doc['id']}"):
+                st.session_state["confirm_delete"] = doc["id"]      # запомнить, что подтверждаем
                 st.rerun()
-            else:
-                st.error("Не удалось удалить")
