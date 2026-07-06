@@ -1,16 +1,19 @@
+"""Заполнение БД данными из файла"""
+
 from pathlib import Path
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from models import Base, Document
 
-from csv_parser import parse_data
 from config import db_engine
+from csv_parser import parse_data
 
 # путь к csv-файлу относительно корня проекта, независимо от рабочего каталога
 CSV_PATH = Path(__file__).resolve().parent.parent / "data" / "posts.csv"
 
 def fill_database():
+    """Заполнение БД данными из файла"""
     # создание таблиц в базе данных
     Base.metadata.create_all(bind=db_engine)
 
@@ -38,4 +41,3 @@ def fill_database():
 
 if __name__ == "__main__":
     fill_database()
-
