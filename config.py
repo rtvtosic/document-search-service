@@ -1,3 +1,5 @@
+"""Файл подключения к движку Postgres и клиенту Elastic"""
+
 import os
 
 from sqlalchemy import create_engine
