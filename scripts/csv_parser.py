@@ -1,9 +1,12 @@
+"""Парсинг данных из .csv-файла"""
+
 import ast
-import pandas as pd
 from datetime import datetime
+import pandas as pd
 
 
 def parse_data(path: str) -> list:
+    """Парсинг данных из .csv-файла"""
     data = pd.read_csv(path)
     formatted_data = []
 
@@ -21,6 +24,4 @@ def parse_data(path: str) -> list:
 
 
 if __name__ == "__main__":
-    # data = parse_data('posts.csv')
-    # print(data)
     parse_data('posts.csv')
