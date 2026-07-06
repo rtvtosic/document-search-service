@@ -1,3 +1,5 @@
+"""Модели данных для БД"""
+
 from datetime import datetime
 
 from sqlalchemy.orm import DeclarativeBase
@@ -7,7 +9,9 @@ from sqlalchemy import String, Text, DateTime
 from sqlalchemy.dialects.postgresql import ARRAY
 
 
-class Base(DeclarativeBase): pass
+class Base(DeclarativeBase):
+    """Базовый класс"""
+
 
 class Document(Base):
     """Модель документа"""
