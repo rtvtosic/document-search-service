@@ -1,13 +1,16 @@
-"""Модуль для создания движка PostgreSQL"""
+"""Модуль выдачи асинхронной сессии БД как зависимости FastAPI"""
 
-from sqlalchemy.orm import Session
-from config import sync_db_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from config import async_db_engine
 
+AsyncSessionLocal = async_sessionmaker(
+    bind=async_db_engine,
+    expire_on_commit=False
+)
 
-def get_db():
+async def get_db():
     """Создание движка для подключения к PostgreSQL"""
-    db = Session(bind=sync_db_engine)
-    try:
+
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()
+    
