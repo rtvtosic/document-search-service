@@ -11,13 +11,14 @@ services:
     environment:
       DB_HOST: postgres
       ELASTIC_HOST: elasticsearch
-    
+
     depends_on:
       postgres:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
-    
+ 
+
   postgres:
     image: postgres:16
     environment:
@@ -31,7 +32,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    
+
   elasticsearch:
     image: elasticsearch:9.4.1
     environment:
@@ -43,7 +44,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-  
+
   ui:
     build: .
     command: streamlit run ui.py --server.port 8501 --server.address 0.0.0.0
@@ -53,7 +54,7 @@ services:
       API_URL: http://app:8000
     depends_on:
       - app
+    
 
 volumes:
   search_pgdata:
-

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from models import Document
 
 from database import get_db
-from config import client
+from config import sync_client
 
 from schemas import SearchRequest, DocumentSchema
 
@@ -31,7 +31,7 @@ def search_docs_by_text(request: SearchRequest,
     document_ids = []
     result_documents = []
 
-    resp = client.search(
+    resp = sync_client.search(
         index="documents",
         query={
             "match": {
@@ -72,7 +72,7 @@ def delete_doc_by_id(doc_id: int, db: Session = Depends(get_db)):
 
     # удаление из Elasticsearch
     try:
-        client.delete(index="documents", id=str(doc_id))
+        sync_client.delete(index="documents", id=str(doc_id))
     except NotFoundError:
         pass
 
