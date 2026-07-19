@@ -2,8 +2,9 @@
 
 import os
 
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, Elasticsearch
 from dotenv import load_dotenv
 
 
@@ -17,7 +18,14 @@ database = os.getenv("DB_NAME")
 elastic_host = os.getenv("ELASTIC_HOST")
 elastic_port = os.getenv("ELASTIC_PORT")
 
-db_engine = create_async_engine(f"postgresql+psycopg://{user}:{password}@{host}/{database}")
-client = AsyncElasticsearch(
+# асинхронные движки
+async_db_engine = create_async_engine(f"postgresql+psycopg://{user}:{password}@{host}/{database}")
+async_client = AsyncElasticsearch(
+    hosts=[f"http://{elastic_host}:{elastic_port}"]
+)
+
+# синхронные движки
+sync_db_engine = create_engine(f"postgresql+psycopg://{user}:{password}@{host}/{database}")
+sync_client = Elasticsearch(
     hosts=[f"http://{elastic_host}:{elastic_port}"]
 )
